@@ -1,0 +1,6 @@
+{
+  "name": "IT SmartFinder - ระบบค้นหาและเปรียบเทียบสินค้า IT อัจฉริยะ",
+  "description": "ระบบค้นหา เปรียบเทียบสเปกเชิงลึก และจัดอันดับสินค้า IT มือถือ คอมพิวเตอร์ พร้อมซิงค์ Google Sheets และระบบความปลอดภัย",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

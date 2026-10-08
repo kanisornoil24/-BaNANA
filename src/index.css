@@ -1,0 +1,34 @@
+@import "tailwindcss";
+
+@keyframes colorCoat {
+  0% {
+    opacity: 0;
+    clip-path: polygon(0 0, 0 0, 0 100%, 0% 100%);
+  }
+  50% {
+    opacity: 0.95;
+  }
+  100% {
+    opacity: 0.75;
+    clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
+  }
+}
+
+.animate-colorCoat {
+  animation: colorCoat 0.65s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.25s ease-out forwards;
+}
