@@ -36,15 +36,30 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
   const [selectedColor, setSelectedColor] = useState<ProductColor>(
     initialColor || product.colors[0]
   );
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [isColorCoating, setIsColorCoating] = useState(false);
   const [isZoomed, setIsZoomed] = useState(false);
   const [mousePos, setMousePos] = useState({ x: 50, y: 50 });
   const [activeTab, setActiveTab] = useState<'specs' | 'promotions' | 'gifts' | 'warranty'>('specs');
 
+  // Compute available images for the active color and general gallery
+  const activeColorImages = selectedColor.images && selectedColor.images.length > 0
+    ? selectedColor.images
+    : (selectedColor.image ? [selectedColor.image] : [product.defaultImage]);
+
+  const allAvailableImages = Array.from(new Set([
+    ...activeColorImages,
+    ...(product.images || []),
+    product.defaultImage
+  ]));
+
   const handleColorChange = (newColor: ProductColor) => {
     if (newColor.name === selectedColor.name) return;
     setIsColorCoating(true);
     setSelectedColor(newColor);
+    // Switch to first image of new color
+    const nextImg = (newColor.images && newColor.images[0]) || newColor.image || product.defaultImage;
+    setSelectedImage(nextImg);
     setTimeout(() => {
       setIsColorCoating(false);
     }, 700);
@@ -58,7 +73,7 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
     setMousePos({ x, y });
   };
 
-  const displayImage = selectedColor.image || product.defaultImage;
+  const displayImage = selectedImage || activeColorImages[0] || product.defaultImage;
 
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-6 animate-fadeIn">
@@ -148,6 +163,30 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
                 )}
               </div>
             </div>
+
+            {/* Thumbnail Strip: Multi-angle photos (สำหรับดูภาพหลายมุมมองของสีนั้นๆ หรือแกลเลอรี) */}
+            {allAvailableImages.length > 1 && (
+              <div className="w-full mt-2.5 flex items-center gap-2 overflow-x-auto pb-1 px-0.5">
+                {allAvailableImages.map((imgUrl, i) => (
+                  <button
+                    key={i}
+                    type="button"
+                    onClick={() => setSelectedImage(imgUrl)}
+                    className={`relative w-14 h-14 rounded-xl border-2 overflow-hidden shrink-0 bg-slate-50 p-1 transition-all ${
+                      displayImage === imgUrl
+                        ? 'border-amber-500 ring-2 ring-amber-300 shadow-xs'
+                        : 'border-slate-200 hover:border-slate-300 opacity-70 hover:opacity-100'
+                    }`}
+                  >
+                    <img
+                      src={imgUrl}
+                      alt={`ภาพมุมมองที่ ${i + 1}`}
+                      className="w-full h-full object-contain"
+                    />
+                  </button>
+                ))}
+              </div>
+            )}
 
             {/* Color Swatches and Live Label */}
             <div className="w-full mt-4 p-3 bg-slate-50 rounded-xl border border-slate-200/80">
@@ -323,19 +362,27 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
                     </p>
                   </div>
 
-                  <ul className="space-y-2.5">
-                    {product.promotions.map((promo, idx) => (
-                      <li
-                        key={idx}
-                        className="p-3.5 bg-white border border-slate-200 rounded-xl flex items-start gap-2.5 text-xs sm:text-sm text-slate-800 shadow-2xs"
-                      >
-                        <span className="w-5 h-5 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold text-xs shrink-0 mt-0.5">
-                          ✓
-                        </span>
-                        <span className="font-medium leading-relaxed">{promo}</span>
-                      </li>
-                    ))}
-                  </ul>
+                  {product.promotions.length > 0 ? (
+                    <ul className="space-y-2.5">
+                      {product.promotions.map((promo, idx) => (
+                        <li
+                          key={idx}
+                          className="p-3.5 bg-white border border-slate-200 rounded-xl flex items-start gap-2.5 text-xs sm:text-sm text-slate-800 shadow-2xs"
+                        >
+                          <span className="w-5 h-5 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold text-xs shrink-0 mt-0.5">
+                            ✓
+                          </span>
+                          <span className="font-medium leading-relaxed">{promo}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <div className="p-6 bg-slate-50 border border-dashed border-slate-300 rounded-2xl text-center">
+                      <p className="text-xs sm:text-sm text-slate-500 font-medium">
+                        ⏳ ยังไม่มีข้อมูลโปรโมชั่นอย่างเป็นทางการสำหรับรุ่นนี้ (เว้นว่างไว้ตามข้อมูลจริง รอการยืนยันราคาโปรโมชั่นจากหน้าร้าน)
+                      </p>
+                    </div>
+                  )}
                 </div>
               )}
 
@@ -344,22 +391,30 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
                 <div className="space-y-3">
                   <div className="p-3.5 bg-emerald-50 border border-emerald-200 rounded-2xl text-xs sm:text-sm text-emerald-900 font-semibold flex items-center gap-2">
                     <Gift className="w-4 h-4 text-emerald-600" />
-                    <span>ของแถมระดับพรีเมียม มูลค่ารวมกว่า 3,000+ บาท ติดตั้งพร้อมใช้ทันที</span>
+                    <span>ของแถมประจำรุ่นและสิทธิพิเศษจากทางร้าน</span>
                   </div>
 
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                    {product.freeGifts.map((gift, idx) => (
-                      <div
-                        key={idx}
-                        className="p-3 bg-white border border-slate-200 rounded-xl flex items-center gap-2.5 text-xs sm:text-sm shadow-2xs"
-                      >
-                        <div className="p-2 rounded-lg bg-yellow-100 text-amber-900 shrink-0">
-                          <Gift className="w-4 h-4" />
+                  {product.freeGifts.length > 0 ? (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                      {product.freeGifts.map((gift, idx) => (
+                        <div
+                          key={idx}
+                          className="p-3 bg-white border border-slate-200 rounded-xl flex items-center gap-2.5 text-xs sm:text-sm shadow-2xs"
+                        >
+                          <div className="p-2 rounded-lg bg-yellow-100 text-amber-900 shrink-0">
+                            <Gift className="w-4 h-4" />
+                          </div>
+                          <span className="font-medium text-slate-800">{gift}</span>
                         </div>
-                        <span className="font-medium text-slate-800">{gift}</span>
-                      </div>
-                    ))}
-                  </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="p-6 bg-slate-50 border border-dashed border-slate-300 rounded-2xl text-center">
+                      <p className="text-xs sm:text-sm text-slate-500 font-medium">
+                        🎁 ยังไม่มีข้อมูลชุดของแถมอย่างเป็นทางการ (เว้นว่างไว้ตามข้อมูลจริง รอการยืนยันจากหน้าร้าน)
+                      </p>
+                    </div>
+                  )}
                 </div>
               )}
 

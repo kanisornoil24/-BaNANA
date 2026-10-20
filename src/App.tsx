@@ -180,6 +180,50 @@ export default function App() {
     return list;
   }, [displayedProducts, selectedCategory, selectedBrand, sortBy]);
 
+  // Dynamic brand list & count from current catalog
+  const { availableBrands, brandCounts } = useMemo(() => {
+    const counts: Record<string, number> = {};
+    const brandSet = new Set<string>();
+
+    products.forEach((p) => {
+      if (p.brand) {
+        brandSet.add(p.brand);
+        counts[p.brand] = (counts[p.brand] || 0) + 1;
+      }
+    });
+
+    const orderedKnown = [
+      'Apple',
+      'Samsung',
+      'OPPO',
+      'Vivo',
+      'Xiaomi',
+      'Realme',
+      'HONOR',
+      'Infinix',
+      'Tecno',
+      'ZTE',
+      'Nothing',
+      'iQOO',
+      'ASUS',
+      'Lenovo'
+    ];
+
+    const sortedBrands = Array.from(brandSet).sort((a, b) => {
+      const ia = orderedKnown.indexOf(a);
+      const ib = orderedKnown.indexOf(b);
+      if (ia !== -1 && ib !== -1) return ia - ib;
+      if (ia !== -1) return -1;
+      if (ib !== -1) return 1;
+      return a.localeCompare(b);
+    });
+
+    return {
+      availableBrands: ['ทั้งหมด', ...sortedBrands],
+      brandCounts: counts
+    };
+  }, [products]);
+
   // Comparison toggle
   const handleToggleCompare = (product: Product) => {
     if (comparedProducts.some((p) => p.id === product.id)) {
@@ -378,6 +422,8 @@ export default function App() {
           onCategoryChange={setSelectedCategory}
           selectedBrand={selectedBrand}
           onBrandChange={setSelectedBrand}
+          availableBrands={availableBrands}
+          brandCounts={brandCounts}
           sortBy={sortBy}
           onSortChange={setSortBy}
           aiExplanation={aiExplanation}

@@ -10,6 +10,8 @@ interface SmartSearchBarProps {
   onCategoryChange: (cat: ProductCategory | 'all') => void;
   selectedBrand: string;
   onBrandChange: (brand: string) => void;
+  availableBrands?: string[];
+  brandCounts?: Record<string, number>;
   sortBy: string;
   onSortChange: (sort: string) => void;
   aiExplanation?: string;
@@ -24,6 +26,8 @@ export const SmartSearchBar: React.FC<SmartSearchBarProps> = ({
   onCategoryChange,
   selectedBrand,
   onBrandChange,
+  availableBrands,
+  brandCounts,
   sortBy,
   onSortChange,
   aiExplanation,
@@ -113,7 +117,9 @@ export const SmartSearchBar: React.FC<SmartSearchBarProps> = ({
     { id: 'tablet', label: 'แท็บเล็ต' }
   ];
 
-  const brands = ['ทั้งหมด', 'Samsung', 'Realme', 'Xiaomi', 'Apple', 'OnePlus', 'ASUS', 'Lenovo'];
+  const brands = availableBrands && availableBrands.length > 0 
+    ? availableBrands 
+    : ['ทั้งหมด', 'Apple', 'Samsung', 'OPPO', 'Vivo', 'Xiaomi', 'Realme', 'HONOR', 'Infinix', 'Tecno', 'ZTE', 'Nothing', 'iQOO', 'ASUS', 'Lenovo'];
 
   return (
     <div className="w-full bg-white rounded-2xl shadow-sm border border-slate-200/80 p-4 sm:p-6 mb-8 transition-all">
@@ -274,6 +280,62 @@ export const SmartSearchBar: React.FC<SmartSearchBarProps> = ({
               <ArrowUpDown className="w-3 h-3 text-slate-400 absolute right-2 top-2.5 pointer-events-none" />
             </div>
           </div>
+        </div>
+      </div>
+
+      {/* Brand Category Filter Bar */}
+      <div className="mt-4 pt-3 border-t border-slate-100">
+        <div className="flex items-center justify-between mb-2">
+          <div className="text-xs font-bold text-slate-700 flex items-center gap-1.5">
+            <span>หมวดหมู่แบรนด์สินค้า:</span>
+            {selectedBrand && (
+              <span className="text-[11px] font-medium text-amber-800 bg-amber-100 px-2 py-0.5 rounded-md">
+                กำลังเลือก: {selectedBrand}
+              </span>
+            )}
+          </div>
+          {selectedBrand && (
+            <button
+              type="button"
+              onClick={() => onBrandChange('')}
+              className="text-[11px] font-semibold text-rose-600 hover:text-rose-700 hover:underline flex items-center gap-0.5"
+            >
+              <X className="w-3 h-3" /> ล้างแบรนด์
+            </button>
+          )}
+        </div>
+        <div className="flex items-center gap-1.5 overflow-x-auto pb-1.5 scrollbar-thin scrollbar-thumb-slate-200">
+          {brands.map((b) => {
+            const isAll = b === 'ทั้งหมด';
+            const isSelected = isAll ? !selectedBrand : selectedBrand.toLowerCase() === b.toLowerCase();
+            const count = brandCounts ? (isAll ? Object.values(brandCounts).reduce((a, c) => a + c, 0) : brandCounts[b] || 0) : null;
+
+            return (
+              <button
+                key={b}
+                type="button"
+                onClick={() => onBrandChange(isAll ? '' : (isSelected ? '' : b))}
+                className={`px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all shrink-0 flex items-center gap-1.5 active:scale-95 ${
+                  isSelected
+                    ? 'bg-slate-900 text-yellow-400 font-bold shadow-sm ring-2 ring-yellow-400/50'
+                    : 'bg-slate-100 hover:bg-slate-200 text-slate-700 hover:text-slate-900'
+                }`}
+              >
+                <span>{b}</span>
+                {count !== null && count > 0 && (
+                  <span
+                    className={`text-[10px] px-1.5 py-0.2 rounded-full font-bold ${
+                      isSelected
+                        ? 'bg-yellow-400 text-slate-950'
+                        : 'bg-slate-200 text-slate-600'
+                    }`}
+                  >
+                    {count}
+                  </span>
+                )}
+              </button>
+            );
+          })}
         </div>
       </div>
     </div>

@@ -1,7 +1,7 @@
 import { Product, ReminderConfig, SheetsConfig } from '../types/product';
 import { INITIAL_PRODUCTS } from '../data/initialProducts';
 
-const STORAGE_KEY_PRODUCTS = 'it_smartfinder_products';
+const STORAGE_KEY_PRODUCTS = 'it_smartfinder_products_bnn_v12';
 const STORAGE_KEY_SHEETS_CONFIG = 'it_smartfinder_sheets_config';
 const STORAGE_KEY_REMINDERS = 'it_smartfinder_reminders';
 const STORAGE_KEY_LAST_BACKUP = 'it_smartfinder_last_backup';

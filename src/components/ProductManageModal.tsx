@@ -9,9 +9,10 @@ import {
   AlertTriangle,
   RotateCcw,
   Sparkles,
-  Package
+  Package,
+  Palette
 } from 'lucide-react';
-import { Product, ProductCategory } from '../types/product';
+import { Product, ProductCategory, ProductColor } from '../types/product';
 import { INITIAL_PRODUCTS } from '../data/initialProducts';
 
 interface ProductManageModalProps {
@@ -51,6 +52,11 @@ export const ProductManageModal: React.FC<ProductManageModalProps> = ({
   const [formRam, setFormRam] = useState('8GB');
   const [formStorage, setFormStorage] = useState('256GB');
   const [formRearCamera, setFormRearCamera] = useState('50MP OIS');
+  const [formFrontCamera, setFormFrontCamera] = useState('32MP');
+  const [formColors, setFormColors] = useState<ProductColor[]>([
+    { name: 'ดำ Titanium Black', hex: '#1e2022', image: '' },
+    { name: 'ขาว Pearl White', hex: '#f5f6f8', image: '' }
+  ]);
   const [formBattery, setFormBattery] = useState('5,000 mAh');
   const [formCharging, setFormCharging] = useState('67W');
   const [formWarranty, setFormWarranty] = useState('ประกันศูนย์ไทย 2 ปี');
@@ -103,6 +109,11 @@ export const ProductManageModal: React.FC<ProductManageModalProps> = ({
     setFormRam('8GB');
     setFormStorage('256GB');
     setFormRearCamera('50MP OIS');
+    setFormFrontCamera('32MP');
+    setFormColors([
+      { name: 'ดำ Titanium Black', hex: '#1e2022', image: '' },
+      { name: 'ขาว Pearl White', hex: '#f5f6f8', image: '' }
+    ]);
     setFormBattery('5,000 mAh');
     setFormCharging('67W Fast Charging');
     setFormWarranty('ประกันศูนย์ไทย 2 ปีเต็ม');
@@ -125,6 +136,15 @@ export const ProductManageModal: React.FC<ProductManageModalProps> = ({
     setFormRam(p.specs.ram);
     setFormStorage(p.specs.storage);
     setFormRearCamera(p.specs.rearCamera);
+    setFormFrontCamera(p.specs.frontCamera || '32MP');
+    setFormColors(
+      p.colors && p.colors.length > 0
+        ? p.colors.map(c => ({ ...c }))
+        : [
+            { name: 'ดำ Default Black', hex: '#1e2022', image: p.defaultImage },
+            { name: 'ขาว Default White', hex: '#f5f6f8', image: p.defaultImage }
+          ]
+    );
     setFormBattery(p.specs.battery);
     setFormCharging(p.specs.charging);
     setFormWarranty(p.warranty);
@@ -158,22 +178,14 @@ export const ProductManageModal: React.FC<ProductManageModalProps> = ({
         inStock: formStockCount > 0,
         stockCount: Number(formStockCount) || 1,
         tags: ['สินค้ามาใหม่'],
-        colors: [
-          {
-            name: 'ดำ Titanium Black',
-            hex: '#1e2022',
-            overlayHex: '#1e2022',
-            image: formImage
-          },
-          {
-            name: 'ขาว Pearl White',
-            hex: '#f5f6f8',
-            overlayHex: '#f5f6f8',
-            image: formImage
-          }
-        ],
+        colors: formColors.filter(c => c.name.trim().length > 0).map(c => ({
+          ...c,
+          overlayHex: c.overlayHex || c.hex,
+          image: c.image || formImage || ''
+        })),
         defaultImage:
           formImage ||
+          (formColors[0]?.image) ||
           'https://images.unsplash.com/photo-1598327105666-5b89351aff97?auto=format&fit=crop&w=800&q=80',
         specs: {
           screen: formScreen,
@@ -181,7 +193,7 @@ export const ProductManageModal: React.FC<ProductManageModalProps> = ({
           ram: formRam,
           storage: formStorage,
           rearCamera: formRearCamera,
-          frontCamera: '32MP',
+          frontCamera: formFrontCamera,
           battery: formBattery,
           charging: formCharging,
           os: 'Android 14',
@@ -212,6 +224,11 @@ export const ProductManageModal: React.FC<ProductManageModalProps> = ({
             stockCount: Number(formStockCount) || 0,
             inStock: Number(formStockCount) > 0,
             defaultImage: formImage || p.defaultImage,
+            colors: formColors.filter(c => c.name.trim().length > 0).map(c => ({
+              ...c,
+              overlayHex: c.overlayHex || c.hex,
+              image: c.image || formImage || p.defaultImage
+            })),
             specs: {
               ...p.specs,
               screen: formScreen,
@@ -219,6 +236,7 @@ export const ProductManageModal: React.FC<ProductManageModalProps> = ({
               ram: formRam,
               storage: formStorage,
               rearCamera: formRearCamera,
+              frontCamera: formFrontCamera,
               battery: formBattery,
               charging: formCharging
             },
@@ -451,13 +469,124 @@ export const ProductManageModal: React.FC<ProductManageModalProps> = ({
                 </div>
 
                 <div>
-                  <label className="block font-semibold text-slate-700 mb-1">กล้องถ่ายรูป:</label>
+                  <label className="block font-semibold text-slate-700 mb-1">กล้องหลัง:</label>
                   <input
                     type="text"
                     value={formRearCamera}
                     onChange={(e) => setFormRearCamera(e.target.value)}
+                    placeholder="เช่น 50MP OIS + 8MP Ultra Wide"
                     className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl"
                   />
+                </div>
+
+                <div>
+                  <label className="block font-semibold text-slate-700 mb-1">กล้องหน้า:</label>
+                  <input
+                    type="text"
+                    value={formFrontCamera}
+                    onChange={(e) => setFormFrontCamera(e.target.value)}
+                    placeholder="เช่น 32MP AI Portrait"
+                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl"
+                  />
+                </div>
+
+                {/* Section: Color Options & Color Images */}
+                <div className="sm:col-span-3 p-4 bg-slate-50/90 rounded-2xl border border-slate-200 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <Palette className="w-4 h-4 text-amber-600" />
+                      <label className="font-bold text-slate-800 text-xs sm:text-sm">
+                        ตัวเลือกสีและรูปภาพประจำสี (Colors & Images):
+                      </label>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setFormColors([
+                          ...formColors,
+                          { name: 'สีใหม่', hex: '#6366f1', image: '' }
+                        ])
+                      }
+                      className="text-xs px-2.5 py-1 bg-amber-100 hover:bg-amber-200 text-amber-900 font-bold rounded-lg flex items-center gap-1 transition-colors"
+                    >
+                      <Plus className="w-3.5 h-3.5" />
+                      <span>เพิ่มสี</span>
+                    </button>
+                  </div>
+                  <p className="text-[11px] text-slate-500">
+                    กำหนดชื่อสี, โค้ดสี HEX (สามารถคลิกเลือกสีได้), และลิงก์รูปภาพของสีนั้นๆ ได้มากกว่า 2 สี
+                  </p>
+
+                  <div className="space-y-2.5">
+                    {formColors.map((colorItem, cIdx) => (
+                      <div
+                        key={cIdx}
+                        className="p-3 bg-white rounded-xl border border-slate-200/90 shadow-2xs flex flex-col sm:flex-row items-start sm:items-center gap-2.5"
+                      >
+                        {/* Color Picker & Preview */}
+                        <div className="flex items-center gap-2 shrink-0">
+                          <input
+                            type="color"
+                            value={colorItem.hex.startsWith('#') ? colorItem.hex : '#1e2022'}
+                            onChange={(e) => {
+                              const updated = [...formColors];
+                              updated[cIdx] = { ...updated[cIdx], hex: e.target.value, overlayHex: e.target.value };
+                              setFormColors(updated);
+                            }}
+                            className="w-8 h-8 rounded-lg cursor-pointer border border-slate-300 p-0.5 bg-white"
+                            title="คลิกเลือกโค้ดสี"
+                          />
+                          <span className="text-[11px] font-mono text-slate-500 w-16">
+                            {colorItem.hex}
+                          </span>
+                        </div>
+
+                        {/* Color Name Input */}
+                        <div className="w-full sm:w-48 shrink-0">
+                          <input
+                            type="text"
+                            value={colorItem.name}
+                            onChange={(e) => {
+                              const updated = [...formColors];
+                              updated[cIdx] = { ...updated[cIdx], name: e.target.value };
+                              setFormColors(updated);
+                            }}
+                            placeholder="ชื่อสี เช่น ดำ Phantom Black"
+                            className="w-full px-2.5 py-1.5 text-xs bg-slate-50 border border-slate-200 rounded-lg"
+                          />
+                        </div>
+
+                        {/* Color Specific Image URL */}
+                        <div className="flex-1 w-full">
+                          <input
+                            type="url"
+                            value={colorItem.image || ''}
+                            onChange={(e) => {
+                              const updated = [...formColors];
+                              updated[cIdx] = { ...updated[cIdx], image: e.target.value };
+                              setFormColors(updated);
+                            }}
+                            placeholder="ลิงก์รูปภาพของสีนี้ (ถ้าเว้นว่างจะใช้รูปหลัก)"
+                            className="w-full px-2.5 py-1.5 text-xs bg-slate-50 border border-slate-200 rounded-lg"
+                          />
+                        </div>
+
+                        {/* Delete color button */}
+                        {formColors.length > 1 && (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setFormColors(formColors.filter((_, idx) => idx !== cIdx));
+                            }}
+                            className="p-1.5 text-rose-500 hover:text-rose-700 hover:bg-rose-50 rounded-lg transition-colors shrink-0"
+                            title="ลบสีนี้"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        )}
+                      </div>
+                    ))}
+                  </div>
                 </div>
 
                 <div>

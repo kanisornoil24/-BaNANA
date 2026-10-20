@@ -5,6 +5,7 @@ export interface ProductColor {
   hex: string;
   overlayHex?: string;
   image?: string;
+  images?: string[]; // Multiple images for this specific color
 }
 
 export interface ProductSpecs {
@@ -35,6 +36,7 @@ export interface Product {
   tags: string[];
   colors: ProductColor[];
   defaultImage: string;
+  images?: string[]; // Multiple gallery images for the product
   specs: ProductSpecs;
   promotions: string[];
   freeGifts: string[];

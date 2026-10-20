@@ -221,10 +221,17 @@ export const ProductCard: React.FC<ProductCardProps> = ({
 
           {/* Free Gifts & Store Perks Brief */}
           <div className="mt-2.5 flex items-center gap-2 text-[11px] text-slate-500">
-            <div className="flex items-center gap-1 text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded-md font-medium">
-              <Gift className="w-3 h-3" />
-              <span>ของแถม {product.freeGifts.length} ชิ้น</span>
-            </div>
+            {product.freeGifts.length > 0 ? (
+              <div className="flex items-center gap-1 text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded-md font-medium">
+                <Gift className="w-3 h-3" />
+                <span>ของแถม {product.freeGifts.length} ชิ้น</span>
+              </div>
+            ) : (
+              <div className="flex items-center gap-1 text-slate-600 bg-slate-100 px-1.5 py-0.5 rounded-md font-medium">
+                <Gift className="w-3 h-3 text-slate-400" />
+                <span>ของแถม: รออัปเดตหน้าร้าน</span>
+              </div>
+            )}
             <div className="flex items-center gap-1 text-blue-700 bg-blue-50 px-1.5 py-0.5 rounded-md font-medium">
               <ShieldCheck className="w-3 h-3" />
               <span>ประกันแท้</span>
